@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profitly</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.container {
+    max-width: 400px;
+    margin: auto;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: none;
+}
+
+button {
+    background: #22c55e;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.card {
+    background: #1e293b;
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.summary {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.summary div {
+    background: #1e293b;
+    padding: 10px;
+    border-radius: 10px;
+    width: 30%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>💰 Profitly</h2>
+
+<input type="number" id="amount" placeholder="ادخل المبلغ بالدينار">
+
+<select id="note">
+    <option value="نقل">نقل</option>
+    <option value="اكل">اكل</option>
+    <option value="فاتورة">فاتورة</option>
+    <option value="تسوق">تسوق</option>
+    <option value="اخرى">اخرى</option>
+</select>
+
+<button onclick="addExpense()">إضافة</button>
+
+<div class="summary">
+    <div>
+        <small>اليوم</small>
+        <div id="today">0</div>
+    </div>
+    <div>
+        <small>الأسبوع</small>
+        <div id="week">0</div>
+    </div>
+    <div>
+        <small>الشهر</small>
+        <div id="month">0</div>
+    </div>
+</div>
+
+<h3>📜 العمليات</h3>
+<div id="history"></div>
+
+</div>
+
+<script>
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+
+function addExpense() {
+    let amount = document.getElementById("amount").value;
+    let note = document.getElementById("note").value;
+
+    if (!amount) return alert("ادخل مبلغ");
+
+    let now = new Date();
+
+    expenses.push({
+        amount: parseFloat(amount),
+        note: note,
+        date: now.toISOString()
+    });
+
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+
+    document.getElementById("amount").value = "";
+
+    render();
+}
+
+function render() {
+    let history = document.getElementById("history");
+    history.innerHTML = "";
+
+    let todayTotal = 0;
+    let weekTotal = 0;
+    let monthTotal = 0;
+
+    let now = new Date();
+
+    expenses.forEach(e => {
+        let d = new Date(e.date);
+
+        let item = document.createElement("div");
+        item.className = "card";
+
+        item.innerHTML = `
+            <b>${e.amount} د.ع</b><br>
+            ${e.note}<br>
+            <small>${d.toLocaleDateString()} - ${d.toLocaleTimeString()}</small>
+        `;
+
+        history.prepend(item);
+
+        // اليوم
+        if (d.toDateString() === now.toDateString()) {
+            todayTotal += e.amount;
+        }
+
+        // الأسبوع
+        let weekAgo = new Date();
+        weekAgo.setDate(now.getDate() - 7);
+        if (d >= weekAgo) {
+            weekTotal += e.amount;
+        }
+
+        // الشهر
+        if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
+            monthTotal += e.amount;
+        }
+    });
+
+    document.getElementById("today").innerText = todayTotal;
+    document.getElementById("week").innerText = weekTotal;
+    document.getElementById("month").innerText = monthTotal;
+}
+
+render();
+</script>
+
+</body>
+</html>
