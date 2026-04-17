@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Profitly</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
 
 <style>
 body {
@@ -31,7 +35,6 @@ button {
     background: #22c55e;
     color: white;
     font-weight: bold;
-    cursor: pointer;
 }
 
 .card {
@@ -65,28 +68,19 @@ button {
 <input type="number" id="amount" placeholder="ادخل المبلغ بالدينار">
 
 <select id="note">
-    <option value="نقل">نقل</option>
-    <option value="اكل">اكل</option>
-    <option value="فاتورة">فاتورة</option>
-    <option value="تسوق">تسوق</option>
-    <option value="اخرى">اخرى</option>
+    <option>نقل</option>
+    <option>اكل</option>
+    <option>فاتورة</option>
+    <option>تسوق</option>
+    <option>اخرى</option>
 </select>
 
 <button onclick="addExpense()">إضافة</button>
 
 <div class="summary">
-    <div>
-        <small>اليوم</small>
-        <div id="today">0</div>
-    </div>
-    <div>
-        <small>الأسبوع</small>
-        <div id="week">0</div>
-    </div>
-    <div>
-        <small>الشهر</small>
-        <div id="month">0</div>
-    </div>
+    <div><small>اليوم</small><div id="today">0</div></div>
+    <div><small>الأسبوع</small><div id="week">0</div></div>
+    <div><small>الشهر</small><div id="month">0</div></div>
 </div>
 
 <h3>📜 العمليات</h3>
@@ -112,9 +106,7 @@ function addExpense() {
     });
 
     localStorage.setItem("expenses", JSON.stringify(expenses));
-
     document.getElementById("amount").value = "";
-
     render();
 }
 
@@ -142,22 +134,13 @@ function render() {
 
         history.prepend(item);
 
-        // اليوم
-        if (d.toDateString() === now.toDateString()) {
-            todayTotal += e.amount;
-        }
+        if (d.toDateString() === now.toDateString()) todayTotal += e.amount;
 
-        // الأسبوع
         let weekAgo = new Date();
         weekAgo.setDate(now.getDate() - 7);
-        if (d >= weekAgo) {
-            weekTotal += e.amount;
-        }
+        if (d >= weekAgo) weekTotal += e.amount;
 
-        // الشهر
-        if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
-            monthTotal += e.amount;
-        }
+        if (d.getMonth() === now.getMonth()) monthTotal += e.amount;
     });
 
     document.getElementById("today").innerText = todayTotal;
@@ -166,6 +149,10 @@ function render() {
 }
 
 render();
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+}
 </script>
 
 </body>
